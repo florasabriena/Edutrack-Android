@@ -1,4 +1,3 @@
-cat > app/src/main/java/com/example/edutrack/data/repository/AuthRepository.kt << 'EOF'
 package com.example.edutrack.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
@@ -45,4 +44,3 @@ class AuthRepository {
         firebaseAuth.signOut()
     }
 }
-EOF

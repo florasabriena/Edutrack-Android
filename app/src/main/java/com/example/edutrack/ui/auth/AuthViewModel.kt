@@ -1,4 +1,3 @@
-cat > app/src/main/java/com/example/edutrack/ui/auth/AuthViewModel.kt << 'EOF'
 package com.example.edutrack.ui.auth
 
 import androidx.lifecycle.LiveData
@@ -81,4 +80,3 @@ class AuthViewModel : ViewModel() {
         _authState.value = AuthState.Idle
     }
 }
-EOF
