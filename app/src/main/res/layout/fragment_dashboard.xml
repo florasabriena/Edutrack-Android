@@ -19,7 +19,7 @@
             android:layout_marginBottom="16dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="2dp"
-            app:cardBackgroundColor="@color/bg_dark">
+            app:cardBackgroundColor="@android:color/white">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -56,7 +56,7 @@
                             android:text="EduTrack"
                             android:textSize="20sp"
                             android:textStyle="bold"
-                            android:textColor="@color/text_white"/>
+                            android:textColor="@android:color/black"/>
 
                         <TextView
                             android:id="@+id/tvGreeting"
@@ -375,28 +375,56 @@
                     android:id="@+id/llTodoInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
+                    android:orientation="vertical"
                     android:visibility="gone"
                     android:layout_marginBottom="12dp">
 
                     <EditText
                         android:id="@+id/etTodoInput"
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:hint="Tulis tugas baru..."
                         android:background="@drawable/bg_input"
                         android:padding="12dp"
                         android:textSize="14sp"
-                        android:layout_marginEnd="8dp"/>
+                        android:layout_marginBottom="8dp"/>
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnSaveTodo"
-                        android:layout_width="wrap_content"
+                    <RadioGroup
+                        android:id="@+id/rgPriority"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Simpan"
-                        android:textSize="12sp"
-                        app:cornerRadius="8dp"/>
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+
+                        <RadioButton android:id="@+id/rbLow" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Low" android:layout_marginEnd="8dp"/>
+                        <RadioButton android:id="@+id/rbMedium" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Medium" android:layout_marginEnd="8dp" android:checked="true"/>
+                        <RadioButton android:id="@+id/rbHigh" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="High"/>
+                    </RadioGroup>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:id="@+id/tvSelectedDate"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Atur deadline"
+                            android:padding="8dp"
+                            android:textColor="#3B82F6"
+                            android:background="?attr/selectableItemBackground" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnSaveTodo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Simpan"
+                            android:textSize="12sp"
+                            app:cornerRadius="8dp"/>
+                    </LinearLayout>
                 </LinearLayout>
 
                 <!-- Todo list -->
@@ -430,60 +458,67 @@
             app:cardElevation="2dp"
             app:cardBackgroundColor="@color/bg_card">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚡ Aksi Cepat"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="16dp"/>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
+                android:orientation="horizontal"
+                android:weightSum="3">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnGoSchedule"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="⚡ Aksi Cepat"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/text_primary"
-                    android:layout_marginBottom="16dp"/>
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    android:text="Jadwal"
+                    android:textSize="11sp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    app:cornerRadius="10dp"/>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnGoPomodoro"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:text="Pomodoro"
+                    android:textSize="11sp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    app:cornerRadius="10dp"/>
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnGoSchedule"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginEnd="8dp"
-                        android:text="📅 Jadwal"
-                        android:textSize="13sp"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        app:cornerRadius="10dp"/>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnGoPomodoro"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="4dp"
-                        android:layout_marginEnd="4dp"
-                        android:text="⏱️ Pomodoro"
-                        android:textSize="13sp"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        app:cornerRadius="10dp"/>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnGoFlashcard"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="8dp"
-                        android:text="🃏 Flashcard"
-                        android:textSize="13sp"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        app:cornerRadius="10dp"/>
-                </LinearLayout>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnGoFlashcard"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:text="Flashcard"
+                    android:textSize="11sp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    app:cornerRadius="10dp"/>
+            </LinearLayout>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
