@@ -5,28 +5,27 @@
     xmlns:tools="http://tools.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/light_bg"
-    tools:context=".ui.jadwal.JadwalFragment">
+    android:background="#F5F5F5">
 
     <View
         android:id="@+id/viewHeader"
         android:layout_width="match_parent"
-        android:layout_height="160dp"
-        android:background="@color/brand_purple"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="180dp"
+        android:background="#6200EE"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <TextView
         android:id="@+id/tvTitleJadwal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="32dp"
         android:text="Jadwal Belajar"
         android:textColor="@android:color/white"
         android:textSize="26sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <TextView
         android:id="@+id/tvSubtitleJadwal"
@@ -38,100 +37,100 @@
         android:textColor="#E0E0E0"
         android:textSize="14sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvTitleJadwal" />
+        app:layout_constraintTop_toBottomOf="@id/tvTitleJadwal"/>
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/cardJadwalUtama"
+        android:id="@+id/cardSesiTerdekat"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginTop="-30dp"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="24dp"
         app:cardCornerRadius="16dp"
         app:cardElevation="8dp"
-        app:layout_constraintTop_toBottomOf="@id/viewHeader">
+        app:layout_constraintTop_toBottomOf="@id/tvSubtitleJadwal">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:padding="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Sesi Terdekat"
-                android:textColor="@color/brand_dark_purple"
+                android:textColor="#6200EE"
+                android:textStyle="bold"
                 android:textSize="16sp"
-                android:textStyle="bold" />
+                android:layout_marginBottom="12dp"/>
 
-            <RelativeLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp">
-
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
                 <View
-                    android:id="@+id/indicator1"
                     android:layout_width="4dp"
-                    android:layout_height="40dp"
-                    android:background="@color/brand_blue" />
-
-                <TextView
-                    android:id="@+id/tvJam1"
-                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:background="#6200EE"
+                    android:layout_marginEnd="12dp"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_toEndOf="@id/indicator1"
-                    android:layout_marginStart="12dp"
-                    android:text="09:00 - 10:30"
-                    android:textColor="@android:color/black"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/tvJam1"
-                    android:layout_toEndOf="@id/indicator1"
-                    android:layout_marginStart="12dp"
-                    android:text="Review Materi Sistem Informasi"
-                    android:textColor="@android:color/darker_gray" />
-            </RelativeLayout>
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/tvSesiWaktu1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="--:--"
+                        android:textStyle="bold"
+                        android:textColor="#212121"/>
+                    <TextView
+                        android:id="@+id/tvSesiMatkul1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Belum ada jadwal terdekat"
+                        android:textColor="#757575"
+                        android:textSize="14sp"/>
+                </LinearLayout>
+            </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="12dp"
-                android:background="#E0E0E0" />
+                android:background="#E0E0E0"
+                android:layout_marginVertical="12dp"/>
 
-            <RelativeLayout
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
                 <View
-                    android:id="@+id/indicator2"
                     android:layout_width="4dp"
-                    android:layout_height="40dp"
-                    android:background="@color/brand_purple" />
-
-                <TextView
-                    android:id="@+id/tvJam2"
-                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:background="#9C27B0"
+                    android:layout_marginEnd="12dp"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_toEndOf="@id/indicator2"
-                    android:layout_marginStart="12dp"
-                    android:text="13:00 - 15:00"
-                    android:textColor="@android:color/black"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/tvJam2"
-                    android:layout_toEndOf="@id/indicator2"
-                    android:layout_marginStart="12dp"
-                    android:text="Latihan Coding Android Studio"
-                    android:textColor="@android:color/darker_gray" />
-            </RelativeLayout>
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/tvSesiWaktu2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="--:--"
+                        android:textStyle="bold"
+                        android:textColor="#212121"/>
+                    <TextView
+                        android:id="@+id/tvSesiMatkul2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tidak ada sesi berikutnya"
+                        android:textColor="#757575"
+                        android:textSize="14sp"/>
+                </LinearLayout>
+            </LinearLayout>
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>
@@ -141,21 +140,22 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
-        android:padding="16dp"
-        app:layout_constraintTop_toBottomOf="@id/cardJadwalUtama"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardSesiTerdekat"
+        tools:listitem="@layout/item_jadwal_card"/>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fabAddJadwal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="24dp"
-        android:contentDescription="Tambah Jadwal"
-        android:src="@android:drawable/ic_input_add"
-        app:backgroundTint="@color/brand_purple"
-        app:tint="@android:color/white"
+        android:text="+"
+        android:textSize="28sp"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        app:backgroundTint="#6200EE"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

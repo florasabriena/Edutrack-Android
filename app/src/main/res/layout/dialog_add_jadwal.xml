@@ -1,58 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="24dp"
-    android:background="@android:color/white">
+    android:padding="24dp">
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Tambah Jadwal Baru"
+        android:text="Tambah Jadwal Kuliah"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:textColor="@color/brand_purple"
-        android:layout_marginBottom="20dp"/>
+        android:textColor="#212121"
+        android:layout_marginBottom="16dp"/>
 
     <EditText
         android:id="@+id/et_mata_kuliah"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Nama Mata Kuliah (cth: AI / RMP)"
-        android:inputType="textPersonName"
-        android:layout_marginBottom="12dp" />
+        android:hint="Nama Mata Kuliah"
+        android:inputType="text"
+        android:layout_marginBottom="12dp"/>
 
     <EditText
         android:id="@+id/et_jam_mulai"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Jam Mulai (cth: 09:00)"
+        android:hint="Jam Mulai (Contoh: 09:00)"
         android:inputType="time"
-        android:layout_marginBottom="12dp" />
+        android:layout_marginBottom="12dp"/>
 
     <EditText
         android:id="@+id/et_jam_selesai"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Jam Selesai (cth: 10:30)"
+        android:hint="Jam Selesai (Contoh: 11:30)"
         android:inputType="time"
-        android:layout_marginBottom="12dp" />
+        android:layout_marginBottom="12dp"/>
 
     <EditText
         android:id="@+id/et_keterangan"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Keterangan (cth: Ruang Lab Gedung A)"
+        android:hint="Keterangan / Ruangan (Opsional)"
         android:inputType="text"
-        android:layout_marginBottom="20dp" />
+        android:layout_marginBottom="24dp"/>
 
     <Button
         android:id="@+id/btn_simpan_jadwal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Simpan ke Database"
-        android:backgroundTint="@color/brand_purple"
-        android:textColor="@android:color/white"
-        android:textStyle="bold" />
+        android:text="SIMPAN JADWAL"
+        android:backgroundTint="#6200EE"
+        android:textColor="@android:color/white"/>
 </LinearLayout>

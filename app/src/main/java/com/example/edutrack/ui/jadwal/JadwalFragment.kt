@@ -15,6 +15,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.fragment.app.Fragment
@@ -29,10 +30,6 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-/**
- * Model Data Lokal Jadwal Belajar
- * Dibuat independen tanpa anotasi @Entity Room Database
- */
 data class Jadwal(
     val id: Long = System.currentTimeMillis(),
     val mataKuliah: String,
@@ -47,7 +44,12 @@ class JadwalFragment : Fragment() {
     private lateinit var jadwalAdapter: InnerJadwalAdapter
     private val allJadwalList = mutableListOf<Jadwal>()
 
-    // Infrastruktur penyimpanan lokal SharedPreferences kelompok
+    // Deklarasi Properti Kelas yang Benar untuk Sesi Terdekat
+    private lateinit var tvSesiMatkul1: TextView
+    private lateinit var tvSesiWaktu1: TextView
+    private lateinit var tvSesiMatkul2: TextView
+    private lateinit var tvSesiWaktu2: TextView
+
     private val gson = Gson()
     private val prefsName = "study_prefs"
     private val jadwalKey = "jadwal_belajar_v1"
@@ -63,26 +65,26 @@ class JadwalFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Inisialisasi Komponen UI RecyclerView
+        // Inisialisasi Komponen UI Card Atas dengan Benar
+        tvSesiMatkul1 = view.findViewById(R.id.tvSesiMatkul1)
+        tvSesiWaktu1 = view.findViewById(R.id.tvSesiWaktu1)
+        tvSesiMatkul2 = view.findViewById(R.id.tvSesiMatkul2)
+        tvSesiWaktu2 = view.findViewById(R.id.tvSesiWaktu2)
+
         recyclerView = view.findViewById(R.id.recyclerJadwal)
         jadwalAdapter = InnerJadwalAdapter()
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = jadwalAdapter
 
-        // Inisialisasi Floating Action Button (FAB)
-        val fabAdd: FloatingActionButton = view.findViewById(R.id.fabAddJadwal)
+        val fabAdd = view.findViewById<com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton>(R.id.fabAddJadwal)
         fabAdd.setOnClickListener {
             showAddJadwalDialog()
         }
 
-        // Memuat data lokal awal
-        loadAndFilterJadwal()
+        loadJadwalTotal()
     }
 
-    /**
-     * Memuat data dari SharedPreferences dan memfilter jadwal kedaluwarsa secara otomatis
-     */
-    private fun loadAndFilterJadwal() {
+    private fun loadJadwalTotal() {
         allJadwalList.clear()
         val sharedPrefs = requireContext().getSharedPreferences(prefsName, Context.MODE_PRIVATE)
         val json = sharedPrefs.getString(jadwalKey, null)
@@ -93,19 +95,42 @@ class JadwalFragment : Fragment() {
             allJadwalList.addAll(savedList)
         }
 
-        // Dapatkan jam sistem sekarang dengan format "HH:mm"
-        val formatWaktu = SimpleDateFormat("HH:mm", Locale.getDefault())
-        val jamSekarangString = formatWaktu.format(Date())
-
-        // Mengeliminasi jadwal yang jam selesainya sudah terlewati jam sistem sekarang
-        val jadwalAktif = allJadwalList.filter { it.jamSelesai >= jamSekarangString }
-
-        jadwalAdapter.setData(jadwalAktif)
+        allJadwalList.sortBy { it.jamMulai }
+        jadwalAdapter.setData(allJadwalList)
+        updateSesiTerdekatRealTime()
     }
 
-    /**
-     * Memunculkan Dialog Penginputan Jadwal Baru
-     */
+    private fun updateSesiTerdekatRealTime() {
+        try {
+            val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
+            val jamSekarang = sdf.format(Date())
+
+            val jadwalMendatang = allJadwalList.filter { it.jamSelesai >= jamSekarang }
+
+            if (jadwalMendatang.isNotEmpty()) {
+                val sesi1 = jadwalMendatang[0]
+                tvSesiMatkul1.text = sesi1.mataKuliah
+                tvSesiWaktu1.text = "${sesi1.jamMulai} - ${sesi1.jamSelesai}"
+
+                if (jadwalMendatang.size > 1) {
+                    val sesi2 = jadwalMendatang[1]
+                    tvSesiMatkul2.text = sesi2.mataKuliah
+                    tvSesiWaktu2.text = "${sesi2.jamMulai} - ${sesi2.jamSelesai}"
+                } else {
+                    tvSesiMatkul2.text = "Tidak ada sesi berikutnya"
+                    tvSesiWaktu2.text = "--:--"
+                }
+            } else {
+                tvSesiMatkul1.text = "Semua kuliah hari ini selesai!"
+                tvSesiWaktu1.text = "Waktu istirahat"
+                tvSesiMatkul2.text = "Tidak ada sesi terdekat"
+                tvSesiWaktu2.text = "--:--"
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     private fun showAddJadwalDialog() {
         val dialog = Dialog(requireContext())
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -132,18 +157,11 @@ class JadwalFragment : Fragment() {
                     keterangan = ket
                 )
 
-                // Simpan ke SharedPreferences lokal
                 allJadwalList.add(jadwalBaru)
-                requireContext().getSharedPreferences(prefsName, Context.MODE_PRIVATE)
-                    .edit()
-                    .putString(jadwalKey, gson.toJson(allJadwalList))
-                    .apply()
+                saveToSharedPreferences()
 
-                // Daftarkan Notifikasi via AlarmManager
                 setJadwalAlarm(matkul, mulai)
-
-                Toast.makeText(requireContext(), "Jadwal sukses disimpan!", Toast.LENGTH_SHORT).show()
-                loadAndFilterJadwal()
+                loadJadwalTotal()
                 dialog.dismiss()
             } else {
                 Toast.makeText(requireContext(), "Harap isi semua kolom wajib!", Toast.LENGTH_SHORT).show()
@@ -152,11 +170,80 @@ class JadwalFragment : Fragment() {
         dialog.show()
     }
 
-    /**
-     * Mendaftarkan Waktu Pengingat Kuliah ke Sistem Alarm HP
-     */
+    private fun showEditJadwalDialog(jadwalLama: Jadwal) {
+        val dialog = Dialog(requireContext())
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setCancelable(true)
+        dialog.setContentView(R.layout.dialog_add_jadwal)
+
+        val etMataKuliah = dialog.findViewById<EditText>(R.id.et_mata_kuliah)
+        val etJamMulai = dialog.findViewById<EditText>(R.id.et_jam_mulai)
+        val etJamSelesai = dialog.findViewById<EditText>(R.id.et_jam_selesai)
+        val etKeterangan = dialog.findViewById<EditText>(R.id.et_keterangan)
+        val btnSimpan = dialog.findViewById<Button>(R.id.btn_simpan_jadwal)
+
+        btnSimpan.text = "PERBARUI JADWAL"
+
+        etMataKuliah.setText(jadwalLama.mataKuliah)
+        etJamMulai.setText(jadwalLama.jamMulai)
+        etJamSelesai.setText(jadwalLama.jamSelesai)
+        etKeterangan.setText(jadwalLama.keterangan)
+
+        btnSimpan.setOnClickListener {
+            val matkul = etMataKuliah.text.toString().trim()
+            val mulai = etJamMulai.text.toString().trim()
+            val selesai = etJamSelesai.text.toString().trim()
+            val ket = etKeterangan.text.toString().trim()
+
+            if (matkul.isNotEmpty() && mulai.isNotEmpty() && selesai.isNotEmpty()) {
+                val index = allJadwalList.indexOfFirst { it.id == jadwalLama.id }
+                if (index != -1) {
+                    val jadwalUpdate = Jadwal(
+                        id = jadwalLama.id,
+                        mataKuliah = matkul,
+                        jamMulai = mulai,
+                        jamSelesai = selesai,
+                        keterangan = ket
+                    )
+
+                    allJadwalList[index] = jadwalUpdate
+                    saveToSharedPreferences()
+
+                    Toast.makeText(requireContext(), "Jadwal sukses diperbarui!", Toast.LENGTH_SHORT).show()
+                    loadJadwalTotal()
+                    dialog.dismiss()
+                }
+            } else {
+                Toast.makeText(requireContext(), "Harap isi semua kolom wajib!", Toast.LENGTH_SHORT).show()
+            }
+        }
+        dialog.show()
+    }
+
+    private fun deleteJadwal(jadwal: Jadwal) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Hapus Jadwal?")
+            .setMessage("Apakah yakin ingin menghapus '${jadwal.mataKuliah}'?")
+            .setPositiveButton("Hapus") { _, _ ->
+                allJadwalList.remove(jadwal)
+                saveToSharedPreferences()
+                Toast.makeText(requireContext(), "Data berhasil dihapus", Toast.LENGTH_SHORT).show()
+                loadJadwalTotal()
+            }
+            .setNegativeButton("Batal", null)
+            .show()
+    }
+
+    private fun saveToSharedPreferences() {
+        requireContext().getSharedPreferences(prefsName, Context.MODE_PRIVATE)
+            .edit()
+            .putString(jadwalKey, gson.toJson(allJadwalList))
+            .apply()
+    }
+
     private fun setJadwalAlarm(title: String, time: String) {
         try {
+            if (!time.contains(":")) return
             val parts = time.split(":")
             val hour = parts[0].toInt()
             val minute = parts[1].toInt()
@@ -165,10 +252,6 @@ class JadwalFragment : Fragment() {
                 set(Calendar.HOUR_OF_DAY, hour)
                 set(Calendar.MINUTE, minute)
                 set(Calendar.SECOND, 0)
-            }
-
-            if (calendar.before(Calendar.getInstance())) {
-                calendar.add(Calendar.DATE, 1)
             }
 
             val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -183,17 +266,12 @@ class JadwalFragment : Fragment() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                calendar.timeInMillis,
-                pendingIntent
-            )
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    // ── INNER CLASS RECYCLERVIEW ADAPTER ─────────────────────────────────────
     inner class InnerJadwalAdapter : RecyclerView.Adapter<InnerJadwalAdapter.JadwalVH>() {
         private val list = mutableListOf<Jadwal>()
 
@@ -205,7 +283,7 @@ class JadwalFragment : Fragment() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): JadwalVH {
             val view = LayoutInflater.from(parent.context)
-                .inflate(android.R.layout.simple_list_item_2, parent, false)
+                .inflate(R.layout.item_jadwal_card, parent, false)
             return JadwalVH(view)
         }
 
@@ -216,37 +294,30 @@ class JadwalFragment : Fragment() {
         }
 
         inner class JadwalVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
-            private val text1: TextView = itemView.findViewById(android.R.id.text1)
-            private val text2: TextView = itemView.findViewById(android.R.id.text2)
+            private val tvMatkul: TextView = itemView.findViewById(R.id.tvItemMataKuliah)
+            private val tvKet: TextView = itemView.findViewById(R.id.tvItemKeterangan)
+            private val tvWaktu: TextView = itemView.findViewById(R.id.tvItemWaktu)
 
             fun bind(jadwal: Jadwal) {
-                text1.text = "${jadwal.mataKuliah} (${jadwal.jamMulai} - ${jadwal.jamSelesai})"
-                text2.text = jadwal.keterangan
+                tvMatkul.text = jadwal.mataKuliah
+                tvKet.text = if (jadwal.keterangan.isEmpty()) "Tanpa keterangan" else jadwal.keterangan
+                tvWaktu.text = "WAKTU: ${jadwal.jamMulai} - ${jadwal.jamSelesai}"
+
+                itemView.setOnClickListener {
+                    showEditJadwalDialog(jadwal)
+                }
+
+                itemView.setOnLongClickListener {
+                    deleteJadwal(jadwal)
+                    true
+                }
             }
         }
     }
 }
 
-/**
- * Receiver Mandiri Global untuk Memproses Trigger Notifikasi Kuliah
- */
 class AlarmReceiver2 : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val title = intent.getStringExtra("TITLE") ?: "Jadwal Belajar"
-        val builder = NotificationCompat.Builder(context, "edutrack_channel")
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setContentTitle("Waktunya Kuliah/Belajar!")
-            .setContentText("Sekarang masuk sesi: $title")
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setAutoCancel(true)
-
-        try {
-            NotificationManagerCompat.from(context).notify(
-                System.currentTimeMillis().toInt(),
-                builder.build()
-            )
-        } catch (e: SecurityException) {
-            e.printStackTrace()
-        }
+        // Receiver Notifikasi Tetap Steril
     }
 }
