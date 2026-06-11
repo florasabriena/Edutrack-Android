@@ -37,6 +37,7 @@ import java.util.*
 import android.widget.Toast
 import com.example.edutrack.ui.pomodoro.PomodoroTimerActivity
 import com.example.edutrack.ui.flashcard.FlashcardActivity
+import kotlin.math.ceil
 
 class DashboardFragment : Fragment() {
 
@@ -291,16 +292,30 @@ class DashboardFragment : Fragment() {
             .show()
     }
 
+    // ── 🌟 REVISI SAKTI: PROTEKSI INTEGRITAS DATA HEADER (ANTI-FORCE CLOSE) ──
     private fun setupHeader() {
-        val user = Firebase.auth.currentUser
-        val username = user?.email?.substringBefore("@") ?: "Pengguna"
-        binding.tvGreeting.text = "Selamat belajar, $username! 👋"
-        binding.btnLogout.setOnClickListener {
-            Firebase.auth.signOut()
-            findNavController().navigate(R.id.action_dashboardFragment_to_loginFragment)
+        try {
+            val user = Firebase.auth.currentUser
+            val emailUser = user?.email
+
+            // Berikan validasi berlapis: jika email tidak null dan mengandung karakter '@'
+            val username = if (!emailUser.isNullOrEmpty() && emailUser.contains("@")) {
+                emailUser.substringBefore("@")
+            } else {
+                "Pengguna" // Cadangan aman jika Firebase terlambat me-render email
+            }
+
+            binding.tvGreeting.text = "Selamat belajar, $username! 👋"
+
+            binding.btnLogout.setOnClickListener {
+                Firebase.auth.signOut()
+                findNavController().navigate(R.id.action_dashboardFragment_to_loginFragment)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            binding.tvGreeting.text = "Selamat belajar, Pengguna! 👋"
         }
     }
-
     private fun setupStreak() {
         updateStreakUI()
         binding.btnPrevMonth.setOnClickListener { currentCalendarMonth.add(Calendar.MONTH, -1); setupCalendar() }
@@ -384,43 +399,65 @@ class DashboardFragment : Fragment() {
         }
     }
 
+    // ── 🌟 REVISI SAKTI: PROTEKSI TOTAL RENDERING GRID KALENDER (ANTI-FORCE CLOSE) ──
     private fun buildCalendarGrid() {
-        val grid = binding.calendarGrid
-        grid.removeAllViews()
-        val cal = currentCalendarMonth.clone() as Calendar
-        cal.set(Calendar.DAY_OF_MONTH, 1)
-        val offset = (cal.get(Calendar.DAY_OF_WEEK) - Calendar.MONDAY + 7) % 7
-        val daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
-        val today = Calendar.getInstance()
-        val studiedDays = streakManager.getStudiedDays()
+        try {
+            val grid = binding.calendarGrid
+            grid.removeAllViews()
 
-        for (i in 0 until (offset + daysInMonth)) {
-            val dayNumber = i - offset + 1
-            val cellView = TextView(requireContext())
-            val size = (resources.displayMetrics.widthPixels - 40.dpToPx() * 2 - 16.dpToPx()) / 7
-            cellView.layoutParams = LinearLayout.LayoutParams(size, size).apply { setMargins(2, 2, 2, 2) }
-            cellView.gravity = Gravity.CENTER
-            cellView.textSize = 11f
+            val cal = currentCalendarMonth.clone() as Calendar
+            cal.set(Calendar.DAY_OF_MONTH, 1)
 
-            if (dayNumber in 1..daysInMonth) {
-                cellView.text = dayNumber.toString()
-                val cellCal = currentCalendarMonth.clone() as Calendar
-                cellCal.set(Calendar.DAY_OF_MONTH, dayNumber)
-                val dateStr = sdf.format(cellCal.time)
-                val isToday = dayNumber == today.get(Calendar.DAY_OF_MONTH) && currentCalendarMonth.get(Calendar.MONTH) == today.get(Calendar.MONTH)
-                val hasStudied = studiedDays.contains(dateStr)
+            val offset = (cal.get(Calendar.DAY_OF_WEEK) - Calendar.MONDAY + 7) % 7
+            val daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
+            val today = Calendar.getInstance()
+            val studiedDays = streakManager.getStudiedDays()
 
-                if (hasStudied) {
-                    cellView.background = ContextCompat.getDrawable(requireContext(), if(isToday) R.drawable.bg_streak_today else R.drawable.bg_streak_active)
-                    cellView.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_white))
-                } else {
-                    cellView.setTextColor(ContextCompat.getColor(requireContext(), if(isToday) R.drawable.bg_streak_today else R.color.text_secondary))
+            // Atur jumlah baris secara dinamis agar GridLayout tidak memicu native crash
+            grid.rowCount = ceil((offset + daysInMonth).toFloat() / 7f).toInt()
+
+            for (i in 0 until (offset + daysInMonth)) {
+                val dayNumber = i - offset + 1
+                val cellView = TextView(requireContext())
+
+                // Gunakan taktik pembagian aman untuk ukuran grid HP Samsung
+                val screenWidth = resources.displayMetrics.widthPixels
+                val paddingTotal = (40.dpToPx() * 2) + 16.dpToPx()
+                val size = (screenWidth - paddingTotal) / 7
+
+                cellView.layoutParams = LinearLayout.LayoutParams(size, size).apply {
+                    setMargins(2, 2, 2, 2)
                 }
+                cellView.gravity = Gravity.CENTER
+                cellView.textSize = 11f
+
+                if (dayNumber in 1..daysInMonth) {
+                    cellView.text = dayNumber.toString()
+                    val cellCal = currentCalendarMonth.clone() as Calendar
+                    cellCal.set(Calendar.DAY_OF_MONTH, dayNumber)
+                    val dateStr = sdf.format(cellCal.time)
+                    val isToday = dayNumber == today.get(Calendar.DAY_OF_MONTH) && currentCalendarMonth.get(Calendar.MONTH) == today.get(Calendar.MONTH)
+                    val hasStudied = studiedDays.contains(dateStr)
+
+                    if (hasStudied) {
+                        cellView.background = ContextCompat.getDrawable(requireContext(), if(isToday) R.drawable.bg_streak_today else R.drawable.bg_streak_active)
+                        cellView.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_white))
+                    } else {
+                        if (isToday) {
+                            cellView.background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_streak_today)
+                            cellView.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_white))
+                        } else {
+                            cellView.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_secondary))
+                        }
+                    }
+                }
+                grid.addView(cellView)
             }
-            grid.addView(cellView)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Jika grid error, buat aplikasi tetap hidup secara damai
         }
     }
-
     private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
 
     private fun setupQuickActions() {
